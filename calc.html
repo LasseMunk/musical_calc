@@ -1,0 +1,204 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>The HTML5 Herald</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+
+  
+
+</head>
+
+<body>
+
+    <form>
+        <label for="bpm">enter bpm > calculate</label> <br><br>
+        <input type="text" id="bpm" name="bpm" placeholder="120" style="text-align: center;"/><br><br>
+        <input type="button" onClick="calculate()" Value="show subdivisions in ms" /> <br><br>
+    </form>
+
+  <script>
+
+    var notevalues = [];
+    var notevalueNames = [];
+
+    function calculate() {
+
+    var bpm = document.getElementById("bpm").value;
+    
+    if (isNaN(bpm)) {
+        alert('please input bpm number');
+    } 
+ 
+    var n4 = 60000 / bpm;
+
+    // pre-delay range
+
+        notevalues[0] = n4 / 64; // 256n
+        notevalueNames[0] = '1/256';
+        notevalues[1] = n4 / 32; // 128n
+        notevalueNames[1] = '1/128';
+        notevalues[2] = n4 / 16; // 64n
+        notevalueNames[2] = '1/64';
+        notevalues[3] = n4 / 8;  // 32n
+        notevalueNames[3] = '1/32';
+
+    // Delay, reverb, sidechain times
+
+        notevalues[4]  = ((n4/4) / 3) * 2;      // 16nt
+        notevalueNames[4] = '1/16t';
+
+        notevalues[5]  = n4/4;                  // 16n
+        notevalueNames[5] = '1/16';
+        
+        notevalues[6]  = ((n4 / 2) / 3) * 2;    // 8nt
+        notevalueNames[6] = '1/8t';
+        
+        notevalues[7]  = n4/2;                  // 8n
+        notevalueNames[7] = '1/8';
+        
+        notevalues[8]  = n4;                    // 4n
+        notevalueNames[8] = '1/4';
+        
+        notevalues[9]  = ((n4*2) / 3) * 2;      // 2nt
+        notevalueNames[9] = '1/2t';
+        
+        notevalues[10] = n4 * 2;                // 2n
+        notevalueNames[10] = '1/2';
+        
+        notevalues[11] = n4 * 4;                // 1 bar
+        notevalueNames[11] = '1 bar';
+        
+        notevalues[12] = n4 * 8;                // 2 bars
+        notevalueNames[12] = '2 bar';
+        
+        notevalues[13] = n4 * 12;               // 3 bars
+        notevalueNames[13] = '3 bar';
+        
+        notevalues[14] = n4 * 16;               // 4 bars 
+        notevalueNames[14] = '4 bar';
+
+        for(i = 0; i < notevalues.length; i++) {    // round to nearest int
+            notevalues[i] = Math.round(notevalues[i]);
+        }
+
+        tableCreate_noteValues();
+        tableCreate_metricModulation();
+
+    function tableCreate_noteValues(){
+
+        if(document.getElementById("table_notevalues")) {
+            document.getElementById("table_notevalues").remove();
+        }    
+
+        var body = document.body,
+            tbl  = document.createElement('table');
+        tbl.style.width  = '100px';
+        tbl.style.border = '1px solid black';
+        tbl.id = "table_notevalues";
+
+        body.appendChild(document.createTextNode('notevalue / ms'));
+
+        for(var i = 0; i < notevalues.length; i++){
+            var tr = tbl.insertRow();
+
+            for(var j = 0; j < 3; j++){ 
+                    var td = tr.insertCell();
+                    td.style.border = '1px solid black';
+
+                    if(j == 0) {
+                        td.appendChild(document.createTextNode(notevalueNames[i]));    
+                    }
+                    if(j == 1) {
+                        td.appendChild(document.createTextNode(notevalues[i]));
+                        td.id = "" + notevalueNames[i];
+                    }
+                    if(j == 2) {
+                        td.appendChild(btn = document.createElement("BUTTON"),
+                        btn.innerText ='copy',
+                        btn.name = i,
+                        btn.onclick = function() {copyNotevalue(this.name);}
+                        ); 
+                    }
+            }
+        }
+        
+        body.appendChild(tbl);
+        body.appendChild(document.createElement("br"));
+        
+        }
+
+    function tableCreate_metricModulation(){
+
+        if(document.getElementById("table_metricModulation")) {
+            document.getElementById("table_metricModulation").remove();
+        }    
+
+        var body = document.body,
+            tbl  = document.createElement('table');
+        tbl.style.width  = '100px';
+        tbl.style.border = '1px solid black';
+        tbl.id = "table_metricModulation";
+
+        body.appendChild(document.createTextNode('metric modulations (bpm)'));
+
+        for(var i = 0; i < 5; i++){
+            var tr = tbl.insertRow();
+
+            
+                    var td = tr.insertCell();
+                    td.style.border = '1px solid black';
+
+                    if(i == 0) {
+                        td.appendChild(document.createTextNode("3/2: " + (3*bpm)/2));    
+                    }
+
+                    if(i == 1) {
+                        td.appendChild(document.createTextNode("4/3: " + (4*bpm)/3));    
+                    }
+
+                    if(i == 2) {
+                        td.appendChild(document.createTextNode("5/4: " + (5*bpm)/4));    
+                    }
+
+                    if(i == 3) {
+                        td.appendChild(document.createTextNode("3/4: " + (3*bpm)/4));    
+                    }
+
+                    if(i == 4) {
+                        td.appendChild(document.createTextNode("half: " + (bpm/2)));    
+                    }
+                        
+                
+            }
+            body.appendChild(tbl);
+    }
+
+
+    function copyNotevalue(x) { 
+            var dummy = document.createElement("textarea");
+            // to avoid breaking orgain page when copying more words
+            // cant copy when adding below this code
+            // dummy.style.display = 'none'
+            document.body.appendChild(dummy);
+            //Be careful if you use texarea. setAttribute('value', value), which works with "input" does not work with "textarea". – Eduard
+            
+            var integer = parseInt(x, 10);
+            dummy.value = notevalues[integer];
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);  
+        }
+    
+}
+    
+  </script>
+
+</body>
+</html>
+
+
+
